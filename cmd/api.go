@@ -21,6 +21,11 @@ type dbConfig struct {
 	dsn string
 }
 
+func (api *application) mount() http.Handler {
+	mux := http.NewServeMux()
+	return mux
+}
+
 func (app *application) run(h http.Handler) error {
 	srv := &http.Server{
 		Addr:         app.config.addr,
