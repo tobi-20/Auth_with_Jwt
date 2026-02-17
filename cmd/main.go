@@ -1,33 +1,31 @@
 package main
 
 import (
-	"context"
 	"log"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/tobi-20/Lanixpress/internal/env"
 )
 
 func main() {
 	cfg := config{
 		addr: ":8080",
+		db: dbConfig{
+			dsn: env.GetString("GOOSE_DBSTRING", "host=localhost user=postgres password=postgres dbname=lanixpress sslmode=disable"),
+		},
 	}
 
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, cfg.db.dsn)
-	if err != nil {
-		log.Println(err)
-	}
+	// ctx := context.Background()
+	// conn, err := pgx.Connect(ctx, cfg.db.dsn)
+	// if err != nil {
+	// 	log.Println(err)
+	// }
 
 	api := &application{
 		config: cfg,
-		db:     conn,
+		// db:     conn,
 	}
-	if err:= api.run(api.mount()); err!= nil{
+	if err := api.run(api.mount()); err != nil {
 		log.Fatal(err.Error())
 	}
 
-
-
-
 }
-

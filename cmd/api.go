@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	repo "github.com/tobi-20/Lanixpress/internal/adapters/postgresql/sqlc"
+	"github.com/tobi-20/Lanixpress/users"
 )
 
 type application struct {
@@ -21,8 +23,21 @@ type dbConfig struct {
 	dsn string
 }
 
-func (api *application) mount() http.Handler {
+func (app *application) mount() http.Handler {
 	mux := http.NewServeMux()
+
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		w.WriteHeader(http.StatusAccepted)
+		w.Write([]byte("I'm active"))
+	})
+	userService := users.NewService(repo.New(app.db))
+	userHandler := users.NewHandler(userService)
+	mux.HandleFunc("/user", userHandler.CreateUser)
+
 	return mux
 }
 
