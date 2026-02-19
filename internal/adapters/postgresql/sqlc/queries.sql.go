@@ -11,11 +11,17 @@ import (
 
 const createUser = `-- name: CreateUser :one
 
-INSERT INTO users (name,email,password_hash) values ('josephus kalizzy', 'jboss@example.com', 'chingege') returning id, uid, name, email, role, password_hash
+INSERT INTO users (name,email,password_hash) values ($1, $2, $3) returning id, uid, name, email, role, password_hash
 `
 
-func (q *Queries) CreateUser(ctx context.Context) (User, error) {
-	row := q.db.QueryRow(ctx, createUser)
+type CreateUserParams struct {
+	Name         string `json:"name"`
+	Email        string `json:"email"`
+	PasswordHash string `json:"password_hash"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, createUser, arg.Name, arg.Email, arg.PasswordHash)
 	var i User
 	err := row.Scan(
 		&i.ID,

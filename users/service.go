@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	CreateUser(ctx context.Context) (repo.User, error)
+	CreateUser(ctx context.Context, args repo.CreateUserParams) (repo.User, error)
 }
 
 type svc struct {
@@ -19,7 +19,7 @@ func NewService(repo repo.Querier) Service {
 		repo: repo,
 	}
 }
-func (s *svc) CreateUser(ctx context.Context) (repo.User, error) {
-	return s.repo.CreateUser(ctx)
+func (s *svc) CreateUser(ctx context.Context, args repo.CreateUserParams) (repo.User, error) {
+	return s.repo.CreateUser(ctx, args)
 
 }
