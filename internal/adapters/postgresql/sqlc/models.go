@@ -8,11 +8,79 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Brand struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
+type Category struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
+type Order struct {
+	ID                  int64              `json:"id"`
+	CustomerID          int64              `json:"customer_id"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	ShippingCostKobo    int64              `json:"shipping_cost_kobo"`
+	RawOrderPriceInKobo int64              `json:"raw_order_price_in_kobo"`
+	DiscountType        interface{}        `json:"discount_type"`
+	DiscountValue       int64              `json:"discount_value"`
+	OrderTotal          int64              `json:"order_total"`
+	Status              interface{}        `json:"status"`
+}
+
+type OrderItem struct {
+	ID               int64       `json:"id"`
+	OrderID          int64       `json:"order_id"`
+	ProductVariantID int64       `json:"product_variant_id"`
+	Quantity         int32       `json:"quantity"`
+	PriceInKobo      int64       `json:"price_in_kobo"`
+	DiscountType     interface{} `json:"discount_type"`
+	DiscountValue    int64       `json:"discount_value"`
+	ItemTotal        int64       `json:"item_total"`
+}
+
+type Product struct {
+	ID          int64       `json:"id"`
+	Name        string      `json:"name"`
+	Description pgtype.Text `json:"description"`
+	BrandID     int64       `json:"brand_id"`
+	CategoryID  int64       `json:"category_id"`
+}
+
+type ProductVariant struct {
+	ID          int64  `json:"id"`
+	ProductID   int64  `json:"product_id"`
+	Weight      int32  `json:"weight"`
+	Unit        string `json:"unit"`
+	PriceInKobo int64  `json:"price_in_kobo"`
+	Stock       int32  `json:"stock"`
+}
+
+type RefreshToken struct {
+	ID        int32            `json:"id"`
+	UserID    int64            `json:"user_id"`
+	Token     string           `json:"token"`
+	ExpiresAt pgtype.Timestamp `json:"expires_at"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
+}
+
+type ShippingRule struct {
+	ID             int64       `json:"id"`
+	MinPriceInKobo int64       `json:"min_price_in_kobo"`
+	MaxPriceInKobo int64       `json:"max_price_in_kobo"`
+	Type           interface{} `json:"type"`
+	Value          int64       `json:"value"`
+}
+
 type User struct {
-	ID           int64       `json:"id"`
-	Uid          pgtype.UUID `json:"uid"`
-	Name         string      `json:"name"`
-	Email        string      `json:"email"`
-	Role         interface{} `json:"role"`
-	PasswordHash string      `json:"password_hash"`
+	ID           int64              `json:"id"`
+	Uid          pgtype.UUID        `json:"uid"`
+	Name         string             `json:"name"`
+	Email        string             `json:"email"`
+	PasswordHash string             `json:"password_hash"`
+	Role         interface{}        `json:"role"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	TokenVersion int32              `json:"token_version"`
 }

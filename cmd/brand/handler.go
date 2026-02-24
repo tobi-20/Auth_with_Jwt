@@ -1,4 +1,4 @@
-package users
+package brand
 
 import (
 	"log"
@@ -18,27 +18,20 @@ func NewHandler(service Service) *handler {
 	}
 }
 
-func (h *handler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var tempUser repo.CreateUserParams
-
+func (h *handler) CreateBrand(w http.ResponseWriter, r *http.Request) {
+	var brand repo.Brand
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
 	}
-	if err := json.Read(r, &tempUser); err != nil {
+	if err := json.Read(r, &brand); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
 	}
-	createdUser, err := h.service.CreateUser(r.Context(), tempUser)
-	u := createdUser
-	resp := userResponse{
-		Name:  u.Name,
-		Email: u.Email,
-		Role:  u.Role,
-	}
+	createdBrand, err := h.service.CreateBrand(r.Context(), brand.Name)
 	if err != nil {
 		log.Println(err)
 	}
-
-	json.Write(w, http.StatusCreated, resp)
+	resp := BrandResponse{
+		Name: createdBrand.Name,
+	}
+	json.Write(w, http.StatusAccepted, resp.Name)
 }

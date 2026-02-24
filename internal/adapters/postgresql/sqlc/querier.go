@@ -9,6 +9,13 @@ import (
 )
 
 type Querier interface {
+	CreateBrand(ctx context.Context, name string) (Brand, error)
+	CreateCategory(ctx context.Context, name string) (Category, error)
+	CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error)
+	CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) (OrderItem, error)
+	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
+	CreateProductVariant(ctx context.Context, arg CreateProductVariantParams) (ProductVariant, error)
+	CreateShippingRules(ctx context.Context, arg CreateShippingRulesParams) (ShippingRule, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 }
 

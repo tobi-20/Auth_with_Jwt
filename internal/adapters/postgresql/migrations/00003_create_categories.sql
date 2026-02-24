@@ -1,12 +1,12 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE IF NOT EXISTS categories(
+CREATE TABLE IF NOT EXISTS categories (
   id BIGSERIAL PRIMARY KEY,
-  name TEXT NOT NULL 
+  name TEXT UNIQUE NOT NULL
 );
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-SELECT 'down SQL query';
+DROP TABLE IF EXISTS brands;
 -- +goose StatementEnd

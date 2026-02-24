@@ -7,29 +7,218 @@ package repo
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createBrand = `-- name: CreateBrand :one
+
+INSERT INTO brands (name) values($1) returning id, name
+`
+
+func (q *Queries) CreateBrand(ctx context.Context, name string) (Brand, error) {
+	row := q.db.QueryRow(ctx, createBrand, name)
+	var i Brand
+	err := row.Scan(&i.ID, &i.Name)
+	return i, err
+}
+
+const createCategory = `-- name: CreateCategory :one
+
+INSERT INTO categories (name) values($1) returning id, name
+`
+
+func (q *Queries) CreateCategory(ctx context.Context, name string) (Category, error) {
+	row := q.db.QueryRow(ctx, createCategory, name)
+	var i Category
+	err := row.Scan(&i.ID, &i.Name)
+	return i, err
+}
+
+const createOrder = `-- name: CreateOrder :one
+
+INSERT INTO orders(shipping_cost_kobo, raw_order_price_in_kobo, discount_type, discount_value, order_total) values($1, $2, $3, $4, $5) returning id, customer_id, created_at, shipping_cost_kobo, raw_order_price_in_kobo, discount_type, discount_value, order_total, status
+`
+
+type CreateOrderParams struct {
+	ShippingCostKobo    int64       `json:"shipping_cost_kobo"`
+	RawOrderPriceInKobo int64       `json:"raw_order_price_in_kobo"`
+	DiscountType        interface{} `json:"discount_type"`
+	DiscountValue       int64       `json:"discount_value"`
+	OrderTotal          int64       `json:"order_total"`
+}
+
+func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error) {
+	row := q.db.QueryRow(ctx, createOrder,
+		arg.ShippingCostKobo,
+		arg.RawOrderPriceInKobo,
+		arg.DiscountType,
+		arg.DiscountValue,
+		arg.OrderTotal,
+	)
+	var i Order
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.CreatedAt,
+		&i.ShippingCostKobo,
+		&i.RawOrderPriceInKobo,
+		&i.DiscountType,
+		&i.DiscountValue,
+		&i.OrderTotal,
+		&i.Status,
+	)
+	return i, err
+}
+
+const createOrderItem = `-- name: CreateOrderItem :one
+
+INSERT INTO order_items(quantity, price_in_kobo,discount_type, discount_value, item_total) values ($1, $2, $3, $4, $5) returning id, order_id, product_variant_id, quantity, price_in_kobo, discount_type, discount_value, item_total
+`
+
+type CreateOrderItemParams struct {
+	Quantity      int32       `json:"quantity"`
+	PriceInKobo   int64       `json:"price_in_kobo"`
+	DiscountType  interface{} `json:"discount_type"`
+	DiscountValue int64       `json:"discount_value"`
+	ItemTotal     int64       `json:"item_total"`
+}
+
+func (q *Queries) CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) (OrderItem, error) {
+	row := q.db.QueryRow(ctx, createOrderItem,
+		arg.Quantity,
+		arg.PriceInKobo,
+		arg.DiscountType,
+		arg.DiscountValue,
+		arg.ItemTotal,
+	)
+	var i OrderItem
+	err := row.Scan(
+		&i.ID,
+		&i.OrderID,
+		&i.ProductVariantID,
+		&i.Quantity,
+		&i.PriceInKobo,
+		&i.DiscountType,
+		&i.DiscountValue,
+		&i.ItemTotal,
+	)
+	return i, err
+}
+
+const createProduct = `-- name: CreateProduct :one
+
+INSERT INTO products(name, description) values ($1, $2) returning id, name, description, brand_id, category_id
+`
+
+type CreateProductParams struct {
+	Name        string      `json:"name"`
+	Description pgtype.Text `json:"description"`
+}
+
+func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
+	row := q.db.QueryRow(ctx, createProduct, arg.Name, arg.Description)
+	var i Product
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.BrandID,
+		&i.CategoryID,
+	)
+	return i, err
+}
+
+const createProductVariant = `-- name: CreateProductVariant :one
+
+INSERT INTO product_variants(weight, unit, price_in_kobo, stock) values ($1, $2, $3, $4) returning id, product_id, weight, unit, price_in_kobo, stock
+`
+
+type CreateProductVariantParams struct {
+	Weight      int32  `json:"weight"`
+	Unit        string `json:"unit"`
+	PriceInKobo int64  `json:"price_in_kobo"`
+	Stock       int32  `json:"stock"`
+}
+
+func (q *Queries) CreateProductVariant(ctx context.Context, arg CreateProductVariantParams) (ProductVariant, error) {
+	row := q.db.QueryRow(ctx, createProductVariant,
+		arg.Weight,
+		arg.Unit,
+		arg.PriceInKobo,
+		arg.Stock,
+	)
+	var i ProductVariant
+	err := row.Scan(
+		&i.ID,
+		&i.ProductID,
+		&i.Weight,
+		&i.Unit,
+		&i.PriceInKobo,
+		&i.Stock,
+	)
+	return i, err
+}
+
+const createShippingRules = `-- name: CreateShippingRules :one
+
+INSERT INTO shipping_rules(max_price_in_kobo, min_price_in_kobo,type, value) values ($1, $2, $3, $4) returning id, min_price_in_kobo, max_price_in_kobo, type, value
+`
+
+type CreateShippingRulesParams struct {
+	MaxPriceInKobo int64       `json:"max_price_in_kobo"`
+	MinPriceInKobo int64       `json:"min_price_in_kobo"`
+	Type           interface{} `json:"type"`
+	Value          int64       `json:"value"`
+}
+
+func (q *Queries) CreateShippingRules(ctx context.Context, arg CreateShippingRulesParams) (ShippingRule, error) {
+	row := q.db.QueryRow(ctx, createShippingRules,
+		arg.MaxPriceInKobo,
+		arg.MinPriceInKobo,
+		arg.Type,
+		arg.Value,
+	)
+	var i ShippingRule
+	err := row.Scan(
+		&i.ID,
+		&i.MinPriceInKobo,
+		&i.MaxPriceInKobo,
+		&i.Type,
+		&i.Value,
+	)
+	return i, err
+}
 
 const createUser = `-- name: CreateUser :one
 
-INSERT INTO users (name,email,password_hash) values ($1, $2, $3) returning id, uid, name, email, role, password_hash
+INSERT INTO users (name,email,password_hash,token_version) values ($1, $2, $3, $4) returning id, uid, name, email, password_hash, role, created_at, token_version
 `
 
 type CreateUserParams struct {
 	Name         string `json:"name"`
 	Email        string `json:"email"`
 	PasswordHash string `json:"password_hash"`
+	TokenVersion int32  `json:"token_version"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.Name, arg.Email, arg.PasswordHash)
+	row := q.db.QueryRow(ctx, createUser,
+		arg.Name,
+		arg.Email,
+		arg.PasswordHash,
+		arg.TokenVersion,
+	)
 	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Uid,
 		&i.Name,
 		&i.Email,
-		&i.Role,
 		&i.PasswordHash,
+		&i.Role,
+		&i.CreatedAt,
+		&i.TokenVersion,
 	)
 	return i, err
 }

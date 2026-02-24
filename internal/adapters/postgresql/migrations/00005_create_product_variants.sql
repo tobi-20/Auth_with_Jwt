@@ -1,8 +1,8 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE IF NOT EXISTS product_variants(
+CREATE TABLE IF NOT EXISTS product_variants (
   id BIGSERIAL PRIMARY KEY,
-  product_id BIGSERIAL NOT NULL REFERENCES products(id),
+  product_id BIGINT NOT NULL REFERENCES products(id),
   weight INT NOT NULL,
   unit TEXT NOT NULL,
   price_in_kobo BIGINT NOT NULL,
@@ -12,5 +12,5 @@ CREATE TABLE IF NOT EXISTS product_variants(
 
 -- +goose Down
 -- +goose StatementBegin
-SELECT 'down SQL query';
+DROP TABLE IF EXISTS product_variants;
 -- +goose StatementEnd

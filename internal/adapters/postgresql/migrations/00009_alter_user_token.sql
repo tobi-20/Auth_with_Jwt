@@ -1,9 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE IF NOT EXISTS categories(
-  id BIGSERIAL PRIMARY KEY,
-  name TEXT NOT NULL 
-);
+ALTER TABLE users
+ADD COLUMN token_version INT NOT NULL DEFAULT 0;
 -- +goose StatementEnd
 
 -- +goose Down
