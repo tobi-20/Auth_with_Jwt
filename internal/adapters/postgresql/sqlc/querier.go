@@ -17,6 +17,10 @@ type Querier interface {
 	CreateProductVariant(ctx context.Context, arg CreateProductVariantParams) (ProductVariant, error)
 	CreateShippingRules(ctx context.Context, arg CreateShippingRulesParams) (ShippingRule, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteRefreshTokenByUserID(ctx context.Context, userID int64) error
+	GetRefreshTokenByID(ctx context.Context, tokenID string) (RefreshToken, error)
+	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
+	SaveRefreshToken(ctx context.Context, arg SaveRefreshTokenParams) (RefreshToken, error)
 }
 
 var _ Querier = (*Queries)(nil)

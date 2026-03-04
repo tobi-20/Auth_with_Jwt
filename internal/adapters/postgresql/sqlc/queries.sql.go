@@ -192,14 +192,14 @@ func (q *Queries) CreateShippingRules(ctx context.Context, arg CreateShippingRul
 
 const createUser = `-- name: CreateUser :one
 
-INSERT INTO users (name,email,password_hash,token_version) values ($1, $2, $3, $4) returning id, uid, name, email, password_hash, role, created_at, token_version
+INSERT INTO users (name,email,password_hash,token_version) values ($1, $2, $3, $4) returning id, uid, name, email, password_hash, role, token_version, created_at
 `
 
 type CreateUserParams struct {
 	Name         string `json:"name"`
 	Email        string `json:"email"`
 	PasswordHash string `json:"password_hash"`
-	TokenVersion int32  `json:"token_version"`
+	TokenVersion int64  `json:"token_version"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -217,8 +217,90 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Email,
 		&i.PasswordHash,
 		&i.Role,
-		&i.CreatedAt,
 		&i.TokenVersion,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const deleteRefreshTokenByUserID = `-- name: DeleteRefreshTokenByUserID :exec
+DELETE FROM refresh_tokens WHERE user_id= $1
+`
+
+func (q *Queries) DeleteRefreshTokenByUserID(ctx context.Context, userID int64) error {
+	_, err := q.db.Exec(ctx, deleteRefreshTokenByUserID, userID)
+	return err
+}
+
+const getRefreshTokenByID = `-- name: GetRefreshTokenByID :one
+SELECT id, user_id, hashed_token, expires_at, created_at, token_id FROM refresh_tokens WHERE token_id= $1
+`
+
+func (q *Queries) GetRefreshTokenByID(ctx context.Context, tokenID string) (RefreshToken, error) {
+	row := q.db.QueryRow(ctx, getRefreshTokenByID, tokenID)
+	var i RefreshToken
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.HashedToken,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+		&i.TokenID,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, name, email, password_hash, token_version FROM users WHERE email= $1
+`
+
+type GetUserByEmailRow struct {
+	ID           int64  `json:"id"`
+	Name         string `json:"name"`
+	Email        string `json:"email"`
+	PasswordHash string `json:"password_hash"`
+	TokenVersion int64  `json:"token_version"`
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i GetUserByEmailRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
+		&i.TokenVersion,
+	)
+	return i, err
+}
+
+const saveRefreshToken = `-- name: SaveRefreshToken :one
+INSERT INTO refresh_tokens(user_id, hashed_token, expires_at, token_id) values ($1, $2, $3, $4) returning id, user_id, hashed_token, expires_at, created_at, token_id
+`
+
+type SaveRefreshTokenParams struct {
+	UserID      int64              `json:"user_id"`
+	HashedToken string             `json:"hashed_token"`
+	ExpiresAt   pgtype.Timestamptz `json:"expires_at"`
+	TokenID     string             `json:"token_id"`
+}
+
+func (q *Queries) SaveRefreshToken(ctx context.Context, arg SaveRefreshTokenParams) (RefreshToken, error) {
+	row := q.db.QueryRow(ctx, saveRefreshToken,
+		arg.UserID,
+		arg.HashedToken,
+		arg.ExpiresAt,
+		arg.TokenID,
+	)
+	var i RefreshToken
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.HashedToken,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+		&i.TokenID,
 	)
 	return i, err
 }

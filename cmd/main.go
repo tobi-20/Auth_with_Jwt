@@ -1,11 +1,11 @@
 package main
 
 import (
+	"Lanixpress/internal/env"
 	"context"
 	"log"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/tobi-20/Lanixpress/internal/env"
 )
 
 func main() {

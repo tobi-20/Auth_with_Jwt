@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"time"
 
+	"Lanixpress/cmd/app/auth"
+	repo "Lanixpress/internal/adapters/postgresql/sqlc"
+
 	"github.com/jackc/pgx/v5"
-	"github.com/tobi-20/Lanixpress/cmd/brand"
-	"github.com/tobi-20/Lanixpress/cmd/users"
-	repo "github.com/tobi-20/Lanixpress/internal/adapters/postgresql/sqlc"
 )
 
 type application struct {
@@ -36,13 +36,10 @@ func (app *application) mount() http.Handler {
 		w.Write([]byte("I'm active"))
 	})
 
-	userService := users.NewService(repo.New(app.db))
-	userHandler := users.NewHandler(userService)
+	userService := auth.NewService(repo.New(app.db))
+	userHandler := auth.NewHandler(userService)
 	mux.HandleFunc("/user", userHandler.CreateUser)
-
-	brandService := brand.NewService(repo.New(app.db))
-	brandHandler := brand.NewHandler(brandService)
-	mux.HandleFunc("/brands", brandHandler.CreateBrand)
+	mux.HandleFunc("/login", userHandler.Login)
 
 	return mux
 }

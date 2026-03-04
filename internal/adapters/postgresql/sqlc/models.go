@@ -59,11 +59,12 @@ type ProductVariant struct {
 }
 
 type RefreshToken struct {
-	ID        int32            `json:"id"`
-	UserID    int64            `json:"user_id"`
-	Token     string           `json:"token"`
-	ExpiresAt pgtype.Timestamp `json:"expires_at"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
+	ID          int32              `json:"id"`
+	UserID      int64              `json:"user_id"`
+	HashedToken string             `json:"hashed_token"`
+	ExpiresAt   pgtype.Timestamptz `json:"expires_at"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	TokenID     string             `json:"token_id"`
 }
 
 type ShippingRule struct {
@@ -81,6 +82,6 @@ type User struct {
 	Email        string             `json:"email"`
 	PasswordHash string             `json:"password_hash"`
 	Role         interface{}        `json:"role"`
+	TokenVersion int64              `json:"token_version"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
-	TokenVersion int32              `json:"token_version"`
 }
