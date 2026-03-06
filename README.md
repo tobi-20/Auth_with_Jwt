@@ -3,8 +3,6 @@ JWT Authentication in Go
 A full JWT-based authentication system in Go with login, access tokens, refresh tokens, rotation, and logout designed for stateless, scalable applications. 
 Includes secure cookie handling for refresh tokens.
 
-View the GitHub Repository
-
 Features
 -Login with email and password
 -Short-lived access tokens (15 min)
